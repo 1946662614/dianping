@@ -8,7 +8,9 @@
 -- 1.1优惠券id
 local voucherId = ARGV[1]
 -- 1.2.用户id
-local userId = ARGV[1]
+local userId = ARGV[2]
+-- 1.3订单id
+local userId = ARGV[3]
 
 -- 2.数据key
 -- 2.1库存id

@@ -80,7 +80,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                     initStream();
                     // 1.获取消息队列中的订单信息 XREADGROUP GROUP g1 c1 COUNT 1 BLOCK 2000 STREAMS s1 >
                     List<MapRecord<String, Object, Object>> list = stringRedisTemplate.opsForStream().read(
-                            Consumer.from("g1", "c1"),
+                            Consumer.from("group1", "c1"),
                             StreamReadOptions.empty().count(1).block(Duration.ofSeconds(2)),
                             StreamOffset.create(queueName, ReadOffset.lastConsumed())
                     );
@@ -109,7 +109,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             if (BooleanUtil.isFalse(exists)) {
                 log.info("stream不存在，开始创建stream");
                 // 不存在，需要创建
-                stringRedisTemplate.opsForStream().createGroup(queueName, ReadOffset.latest(), "g1");
+                stringRedisTemplate.opsForStream().createGroup(queueName, ReadOffset.latest(), "group1");
                 log.info("stream和group创建完毕");
                 return;
             }
@@ -118,7 +118,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             if(groups.isEmpty()){
                 log.info("group不存在，开始创建group");
                 // group不存在，创建group
-                stringRedisTemplate.opsForStream().createGroup(queueName, ReadOffset.latest(), "g1");
+                stringRedisTemplate.opsForStream().createGroup(queueName, ReadOffset.latest(), "group1");
                 log.info("group创建完毕");
             }
         }
@@ -128,7 +128,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                 try {
                     // 1.获取消息队列中的订单信息 XREADGROUP GROUP g1 c1 COUNT 1 STREAMS s1 0
                     List<MapRecord<String, Object, Object>> list = stringRedisTemplate.opsForStream().read(
-                            Consumer.from("g1", "c1"),
+                            Consumer.from("group1", "c1"),
                             StreamReadOptions.empty().count(1),
                             StreamOffset.create(queueName, ReadOffset.from("0"))
                     );
@@ -144,7 +144,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                     // 3.创建订单
                     handleVoucherOrder(voucherOrder);
                     // 4.确认消息 XACK stream.orders g1 id
-                    stringRedisTemplate.opsForStream().acknowledge(queueName, "g1", record.getId());
+                    stringRedisTemplate.opsForStream().acknowledge(queueName, "group1", record.getId());
                 } catch (Exception e) {
                     log.error("处理订单异常", e);
                 }
