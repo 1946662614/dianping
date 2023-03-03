@@ -20,12 +20,8 @@ import javax.annotation.Resource;
 public class MvcConfig implements WebMvcConfigurer {
     
     @Resource
-    StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
     
-    /**
-     * 添加拦截器
-     * @param registry
-     */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 登录拦截器
@@ -34,14 +30,12 @@ public class MvcConfig implements WebMvcConfigurer {
                         "/shop/**",
                         "/voucher/**",
                         "/shop-type/**",
-                        "upload/**",
+                        "/upload/**",
                         "/blog/hot",
                         "/user/code",
                         "/user/login"
                 ).order(1);
         // token刷新的拦截器
         registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate)).addPathPatterns("/**").order(0);
-     
-    
     }
 }
